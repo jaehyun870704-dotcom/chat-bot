@@ -1,0 +1,17 @@
+node_modules/
+.env
+*.log
+
+# 대용량 데이터 (벡터 3GB, 로컬 인덱스, 원본 자료)
+vector-pipeline/data/
+자료실/
+새 폴더/
+대법원, 고등법원, 지방법원, 서울행정법원, 헌법재판소결정, 노동위원회판정례, 행정해석, 지침, 산재심사재결례/
+
+# 도구 런타임/상태
+.bkit/
+.claude/
+.agents/
+.codex/
+.cursor/
+.superpowers/
