@@ -1,0 +1,17 @@
+{
+  "name": "search-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Phase 1 - 검색 파이프라인 단독 검증 (Next.js 없이)",
+  "type": "commonjs",
+  "scripts": {
+    "benchmark": "node scripts/benchmark.js",
+    "ask": "node scripts/ask.js"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^17.0.0",
+    "vectra": "^0.15.0"
+  }
+}

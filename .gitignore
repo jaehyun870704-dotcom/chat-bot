@@ -15,3 +15,6 @@ vector-pipeline/data/
 .codex/
 .cursor/
 .superpowers/
+
+# 임베딩 모델 캐시
+.model-cache/
