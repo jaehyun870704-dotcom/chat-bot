@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
+import { tryGetUser } from '@/lib/supabase/server';
 import { BrandMark } from '@/components/BrandMark';
 import { Icon } from '@/components/Icon';
 
@@ -22,8 +22,8 @@ const FEATURES = [
 ];
 
 export default async function LandingPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  // 공개 진입점이므로 설정이 비어 있어도 500 을 내지 않는다. 로그아웃 상태로 그린다.
+  const user = await tryGetUser();
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">

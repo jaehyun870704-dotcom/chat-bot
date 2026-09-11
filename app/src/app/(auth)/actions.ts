@@ -11,6 +11,10 @@ export type AuthState = { error: string | null; notice: string | null };
 // 계정 존재 여부가 드러나지 않도록 일반화한다.
 function friendlyError(message: string): string {
   const m = message.toLowerCase();
+  // 설정 누락은 사용자 잘못이 아니다. 운영자가 볼 수 있게 구분해 안내한다.
+  if (m.includes('환경변수')) {
+    return '서버 설정이 완료되지 않았습니다. 잠시 후 다시 시도해 주세요. (관리자: /api/health 확인)';
+  }
   if (m.includes('invalid login credentials')) return '이메일 또는 비밀번호가 올바르지 않습니다.';
   if (m.includes('email not confirmed')) return '이메일 인증을 먼저 완료해 주세요.';
   if (m.includes('password')) return '비밀번호는 8자 이상이어야 합니다.';
@@ -34,14 +38,18 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
     return { error: '비밀번호는 8자 이상이어야 합니다.', notice: null };
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
-    email: creds.email,
-    password: creds.password,
-    options: { emailRedirectTo: `${siteUrl()}/auth/callback` },
-  });
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signUp({
+      email: creds.email,
+      password: creds.password,
+      options: { emailRedirectTo: `${siteUrl()}/auth/callback` },
+    });
 
-  if (error) return { error: friendlyError(error.message), notice: null };
+    if (error) return { error: friendlyError(error.message), notice: null };
+  } catch (err) {
+    return { error: friendlyError((err as Error).message), notice: null };
+  }
 
   return {
     error: null,
@@ -53,11 +61,15 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   const creds = readCredentials(formData);
   if (!creds) return { error: '이메일과 비밀번호를 모두 입력해 주세요.', notice: null };
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(creds);
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signInWithPassword(creds);
+    if (error) return { error: friendlyError(error.message), notice: null };
+  } catch (err) {
+    return { error: friendlyError((err as Error).message), notice: null };
+  }
 
-  if (error) return { error: friendlyError(error.message), notice: null };
-
+  // redirect() 는 내부적으로 예외를 던지므로 try 밖에 둔다.
   revalidatePath('/', 'layout');
   redirect('/chat');
 }

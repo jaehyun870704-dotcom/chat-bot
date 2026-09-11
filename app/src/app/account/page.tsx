@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import { createClient, tryGetUser } from '@/lib/supabase/server';
 import { signOut } from '@/app/(auth)/actions';
 import { isBillingEnabled } from '@/lib/billing/gate';
 import { Icon } from '@/components/Icon';
@@ -7,9 +8,11 @@ import { BrandMark } from '@/components/BrandMark';
 
 // PRD F-07 마이페이지. 결제·해지는 Phase 4(D-01 확정 후)에 붙인다.
 export default async function AccountPage() {
+  const user = await tryGetUser();
+  if (!user) redirect('/login');
+
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
   const { data: profile } = await supabase
     .from('profiles')
     .select('email, free_questions_used, created_at')

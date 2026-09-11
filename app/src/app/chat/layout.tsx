@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import { createClient, tryGetUser } from '@/lib/supabase/server';
 import { createConversation } from './actions';
 import { signOut } from '@/app/(auth)/actions';
 import { isBillingEnabled } from '@/lib/billing/gate';
@@ -6,6 +7,10 @@ import { isConfigured } from '@/lib/llm/client';
 import { ChatShell } from '@/components/ChatShell';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
+  // 미들웨어가 설정 문제로 통과시켰을 수 있으므로 여기서 다시 확인한다.
+  const user = await tryGetUser();
+  if (!user) redirect('/login');
+
   const supabase = await createClient();
 
   // 목록은 최근 수정순. deleted_at 이 있는 방은 제외한다(F-02).
@@ -15,7 +20,6 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     .is('deleted_at', null)
     .order('updated_at', { ascending: false });
 
-  const { data: { user } } = await supabase.auth.getUser();
   const { data: profile } = await supabase
     .from('profiles')
     .select('free_questions_used')
