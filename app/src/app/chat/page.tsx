@@ -13,7 +13,7 @@ export default function ChatIndexPage() {
   return (
     <div className="no-scrollbar flex flex-1 flex-col items-center justify-center overflow-y-auto px-margin py-space-xl">
       <div className="flex w-full max-w-md flex-col items-center gap-space-xl text-center">
-        <BrandMark size={56} className="shadow-md" />
+        <BrandMark size={60} className="text-primary" title="좋은인재연구소" />
 
         <div className="flex flex-col gap-2">
           <h1 className="text-headline-md text-on-surface">무엇을 도와드릴까요?</h1>

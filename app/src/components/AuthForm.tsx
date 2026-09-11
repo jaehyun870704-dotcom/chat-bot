@@ -43,7 +43,7 @@ export function AuthForm({
         </Link>
 
         <div className="flex flex-col items-center gap-space-md text-center">
-          <BrandMark size={48} className="shadow-md" />
+          <BrandMark size={52} className="text-primary" title="좋은인재연구소" />
           <div className="flex flex-col gap-1">
             <h1 className="text-headline-md text-on-surface">{title}</h1>
             <p className="break-keep-ko text-body-sm text-on-surface-variant">{subtitle}</p>

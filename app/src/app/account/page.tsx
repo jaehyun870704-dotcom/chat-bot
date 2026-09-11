@@ -50,7 +50,7 @@ export default async function AccountPage() {
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-space-xl px-margin py-space-xl">
         <section className="flex items-center gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
-          <BrandMark size={44} />
+          <BrandMark size={40} className="text-primary" title="좋은인재연구소" />
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-label-md font-semibold text-on-surface">
               {profile?.email ?? user?.email ?? '—'}

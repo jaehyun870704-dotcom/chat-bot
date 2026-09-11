@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from './Icon';
-import { BrandMark } from './BrandMark';
+import { BrandAvatar } from './BrandMark';
 import { RichText } from './RichText';
 import { SUGGESTIONS } from './SuggestedQuestions';
 
@@ -200,7 +200,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
           {/* 진행 중 표시 — 목업의 타이핑 인디케이터 패턴 */}
           {stage && !draft && (
             <div className="flex items-start gap-space-sm">
-              <BrandMark size={28} className="shadow-sm" />
+              <BrandAvatar size={28} className="shadow-sm" />
               <div className="flex flex-col gap-1 rounded-2xl rounded-tl-sm bg-surface-container-lowest px-3.5 py-2.5 shadow-sm">
                 <div className="flex items-center gap-2">
                   <span className="flex items-center gap-1">
@@ -220,7 +220,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
           {/* 스트리밍 중인 초안. 완료되면 서버가 저장한 정본으로 교체된다. */}
           {draft && (
             <div className="flex items-start gap-space-sm">
-              <BrandMark size={28} className="shadow-sm" />
+              <BrandAvatar size={28} className="shadow-sm" />
               <div className="no-scrollbar max-h-56 min-w-0 flex-1 overflow-y-auto rounded-2xl rounded-tl-sm bg-surface-container-lowest p-3.5 shadow-sm">
                 <RichText
                   text={draft}

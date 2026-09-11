@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { MessageComposer } from '@/components/MessageComposer';
 import { AnswerView } from '@/components/AnswerView';
 import { SuggestedQuestions } from '@/components/SuggestedQuestions';
-import { BrandMark } from '@/components/BrandMark';
+import { BrandAvatar } from '@/components/BrandMark';
 import { Icon } from '@/components/Icon';
 
 export default async function ConversationPage({
@@ -129,7 +129,7 @@ function EmptyThread() {
       <DateDivider />
 
       <div className="group flex max-w-[88%] items-start gap-space-sm">
-        <BrandMark size={32} className="mt-6 shadow-sm" />
+        <BrandAvatar size={32} className="mt-6 shadow-sm" />
         <div className="flex min-w-0 flex-col gap-1">
           <span className="ml-1 text-label-sm font-semibold text-on-surface">노무 어시스턴트</span>
           <div className="rounded-2xl rounded-tl-sm bg-surface-container-lowest p-space-md shadow-sm">

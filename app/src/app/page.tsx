@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { tryGetUser } from '@/lib/supabase/server';
-import { BrandMark } from '@/components/BrandMark';
+import { BrandLockup } from '@/components/BrandMark';
 import { Icon } from '@/components/Icon';
 
 // 보유 자료 규모. 강점이 곧 숫자이므로 앞에 내세운다. (2026-09-11 실측)
@@ -38,10 +38,7 @@ export default async function LandingPage() {
     <div className="flex min-h-[100dvh] flex-col bg-background">
       <header className="pt-safe sticky top-0 z-40 bg-surface/85 shadow-header backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-3xl items-center justify-between px-margin">
-          <div className="flex items-center gap-space-sm">
-            <BrandMark size={32} />
-            <span className="text-label-md font-semibold text-on-surface">좋은인재연구소</span>
-          </div>
+          <BrandLockup size={30} />
           <Link
             href={user ? '/chat' : '/login'}
             className="rounded-full px-3.5 py-2 text-label-sm font-medium text-on-surface-variant transition-colors hover:bg-surface-container"

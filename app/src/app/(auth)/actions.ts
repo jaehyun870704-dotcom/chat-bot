@@ -70,17 +70,29 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
     return { error: '비밀번호는 8자 이상이어야 합니다.', notice: null };
   }
 
+  let signedIn = false;
+
   try {
     const supabase = await createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: creds.email,
       password: creds.password,
       options: { emailRedirectTo: `${siteUrl()}/auth/callback` },
     });
 
     if (error) return { error: friendlyError(error), notice: null };
+
+    // Supabase 의 '이메일 확인'이 꺼져 있으면 가입과 동시에 세션이 발급된다.
+    // 이때는 인증 메일을 기다리게 하지 않고 바로 들여보낸다.
+    signedIn = Boolean(data.session);
   } catch (err) {
     return { error: friendlyError(err), notice: null };
+  }
+
+  if (signedIn) {
+    // redirect() 는 내부적으로 예외를 던지므로 try 밖에서 호출한다.
+    revalidatePath('/', 'layout');
+    redirect('/chat');
   }
 
   return {

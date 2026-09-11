@@ -50,9 +50,12 @@ export function ChatShell({
   const sidebar = (
     <>
       <div className="flex items-center gap-space-sm border-b border-outline-variant/40 px-space-lg py-space-md">
-        <BrandMark size={32} />
+        <BrandMark size={30} className="text-primary" title="좋은인재연구소" />
         <div className="flex min-w-0 flex-col">
-          <Link href="/" className="truncate text-label-md font-semibold text-on-surface">
+          <Link
+            href="/"
+            className="truncate text-label-md font-semibold tracking-tight text-on-surface"
+          >
             좋은인재연구소
           </Link>
           <span className="truncate text-caption text-on-surface-variant">인사 실무 자료 검색</span>
@@ -132,11 +135,11 @@ export function ChatShell({
                 <Icon name="menu" />
               </button>
 
-              <BrandMark size={32} />
+              <BrandMark size={30} className="text-primary" title="좋은인재연구소" />
 
               <div className="flex min-w-0 flex-col">
                 <div className="flex items-center gap-space-xs">
-                  <span className="truncate text-headline-sm text-on-surface">좋은인재연구소</span>
+                  <span className="truncate text-headline-sm tracking-tight text-on-surface">좋은인재연구소</span>
                   <span className="relative flex h-2 w-2 shrink-0">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />

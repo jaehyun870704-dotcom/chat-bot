@@ -2,7 +2,7 @@ import { assemble, verifyAssembled } from '@/lib/answer/assemble';
 import { DISCLAIMER_BOTTOM, DISCLAIMER_TOP } from '@/lib/answer/disclaimer';
 import { sectionIcon, splitSections } from '@/lib/answer/sections';
 import { Icon } from './Icon';
-import { BrandMark } from './BrandMark';
+import { BrandAvatar } from './BrandMark';
 import { RichText } from './RichText';
 import { CitationList, type Citation } from './CitationList';
 import { AnswerActions } from './AnswerActions';
@@ -48,7 +48,7 @@ export function AnswerView({
 
   return (
     <div className="group flex w-full max-w-[94%] items-start gap-space-sm">
-      <BrandMark size={32} className="mt-6 shadow-sm" />
+      <BrandAvatar size={32} className="mt-6 shadow-sm" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="ml-1 flex items-center gap-1.5">
