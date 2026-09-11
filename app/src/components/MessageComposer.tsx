@@ -20,7 +20,7 @@ const STAGE_LABEL: Record<Stage, string> = {
 
 const STAGE_HINT: Partial<Record<Stage, string>> = {
   // 벡터 인덱스가 없어 실측 평균 17.7초다. 기다림을 숨기지 않고 미리 알린다.
-  search: '자료가 29만 건이라 20초 정도 걸립니다',
+  search: '자료 29만 8천 건을 훑는 중이라 20초 정도 걸립니다',
 };
 
 const BLOCKED_MESSAGE: Record<string, string> = {
@@ -319,7 +319,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
             rows={1}
             maxLength={2000}
             disabled={pending}
-            placeholder="노동법·인사 실무 질문을 입력하세요"
+            placeholder="인사 실무에서 막히는 점을 물어보세요"
             className="no-scrollbar max-h-[120px] min-w-0 flex-1 resize-none self-center bg-transparent px-1 py-1.5 text-body-md text-on-surface outline-none placeholder:text-outline/70 disabled:opacity-60"
             onInput={(e) => {
               const el = e.currentTarget;

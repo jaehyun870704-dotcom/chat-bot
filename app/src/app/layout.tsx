@@ -10,9 +10,9 @@ const inter = Inter({
 
 // D-04(서비스명·도메인) 미결. 확정 전까지 제공 주체명을 그대로 쓴다.
 export const metadata: Metadata = {
-  title: '좋은인재연구소 노동법·HR 상담',
+  title: '좋은인재연구소 HR 자료 검색',
   description:
-    '노동법·인사 실무 질문에 판례·행정해석·상담사례 근거를 붙여 답하는 정보 제공 도구입니다.',
+    '인사 실무 질문에 보유 자료를 검색해 근거와 함께 정리해 드리는 정보 제공 도구입니다.',
 };
 
 export const viewport: Viewport = {

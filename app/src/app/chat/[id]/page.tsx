@@ -40,7 +40,7 @@ export default async function ConversationPage({
         </h1>
         <span className="flex shrink-0 items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-1 text-caption font-medium text-on-primary-fixed">
           <Icon name="database" size={13} />
-          판례·행정해석 29.8만건
+          보유 자료 29.8만건
         </span>
       </header>
 
@@ -134,9 +134,9 @@ function EmptyThread() {
           <span className="ml-1 text-label-sm font-semibold text-on-surface">노무 어시스턴트</span>
           <div className="rounded-2xl rounded-tl-sm bg-surface-container-lowest p-space-md shadow-sm">
             <p className="break-keep-ko text-body-md leading-relaxed text-on-surface">
-              노동법·인사 실무 질문을 남겨 주세요. 판례·행정해석·지침·산재재결례·상담사례{' '}
-              <strong className="font-semibold">29만 8천여 건</strong>을 검색해 근거와 함께
-              정리해 드립니다.
+              인사 실무에서 막히는 점을 물어보세요. 보유 자료{' '}
+              <strong className="font-semibold">29만 8천여 건</strong>에서 찾아, 무엇을 근거로
+              그렇게 말하는지까지 함께 보여 드립니다.
             </p>
           </div>
         </div>

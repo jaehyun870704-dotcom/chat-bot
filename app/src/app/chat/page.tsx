@@ -18,8 +18,8 @@ export default function ChatIndexPage() {
         <div className="flex flex-col gap-2">
           <h1 className="text-headline-md text-on-surface">무엇을 도와드릴까요?</h1>
           <p className="break-keep-ko text-body-md leading-relaxed text-on-surface-variant">
-            근로시간, 임금, 징계, 해고, 산재, 인사제도 등 노동법·인사 실무 질문에 실제 자료를
-            근거로 답해 드립니다.
+            근로시간, 임금, 징계, 해고, 산재, 인사제도 등 인사 실무에서 막히는 점을
+            물어보세요. 보유 자료에서 찾아 근거와 함께 정리해 드립니다.
           </p>
         </div>
 

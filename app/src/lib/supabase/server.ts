@@ -19,9 +19,24 @@ export async function tryGetUser() {
     const { data } = await supabase.auth.getUser();
     return data.user;
   } catch (err) {
+    // Next.js 는 제어 흐름을 예외로 전달한다(동적 렌더 표시, redirect, notFound).
+    // 이걸 삼키면 동적이어야 할 페이지가 로그아웃 상태로 정적 캐시되는 등
+    // 조용히 잘못 동작한다. 우리 오류가 아니면 그대로 다시 던진다.
+    if (isFrameworkControlFlow(err)) throw err;
+
     console.error('[supabase] 세션 확인 실패 — /api/health 를 확인하세요.', err);
     return null;
   }
+}
+
+/** Next.js 내부 제어 예외는 digest 문자열을 갖는다(DYNAMIC_SERVER_USAGE, NEXT_REDIRECT 등). */
+function isFrameworkControlFlow(err: unknown): boolean {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'digest' in err &&
+    typeof (err as { digest?: unknown }).digest === 'string'
+  );
 }
 
 // 사용자 세션으로 동작하는 클라이언트. RLS 가 그대로 적용된다.

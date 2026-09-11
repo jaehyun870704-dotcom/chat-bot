@@ -6,7 +6,7 @@ export default function LoginPage() {
   return (
     <AuthForm
       title="다시 오셨네요"
-      subtitle="노동법·인사 실무 자료를 이어서 검색하세요."
+      subtitle="찾아두신 근거를 이어서 확인하세요."
       submitLabel="로그인"
       action={signIn}
       autoComplete="current-password"

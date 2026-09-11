@@ -55,7 +55,7 @@ export function ChatShell({
           <Link href="/" className="truncate text-label-md font-semibold text-on-surface">
             좋은인재연구소
           </Link>
-          <span className="truncate text-caption text-on-surface-variant">노동법·HR 자료 검색</span>
+          <span className="truncate text-caption text-on-surface-variant">인사 실무 자료 검색</span>
         </div>
       </div>
 
@@ -143,7 +143,7 @@ export function ChatShell({
                   </span>
                 </div>
                 <div className="flex items-center gap-space-xs">
-                  <p className="truncate text-caption text-on-surface-variant">노동법·HR 자료 검색</p>
+                  <p className="truncate text-caption text-on-surface-variant">인사 실무 자료 검색</p>
                   <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-surface-container-high px-1.5 py-0.5 text-caption font-medium text-on-primary-fixed">
                     <Icon name="bolt" size={12} />
                     {modeLabel}
