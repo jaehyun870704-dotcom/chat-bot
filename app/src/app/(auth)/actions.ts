@@ -53,7 +53,11 @@ function friendlyError(error: unknown): string {
     return '요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.';
   }
 
-  return '처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+  // 어느 분기에도 걸리지 않은 오류. 내용은 숨기되 식별자는 남긴다.
+  // 이게 없으면 사용자도 운영자도 "문제가 발생했습니다" 한 줄만 보고 원인을 알 수 없다.
+  // 코드는 Supabase 가 정의한 짧은 식별자라 노출해도 내부 구조가 드러나지 않는다.
+  const ref = code || `E${String(raw.length).padStart(3, '0')}`;
+  return `처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요. (코드: ${ref})`;
 }
 
 function readCredentials(formData: FormData): { email: string; password: string } | null {
