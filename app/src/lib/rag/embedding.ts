@@ -25,9 +25,18 @@ type Extractor = (
 
 let extractorPromise: Promise<Extractor> | null = null;
 
-// 모델 캐시. 서버리스 콜드스타트마다 130MB 를 새로 받지 않도록 경로를 고정한다(PRD §4).
+// 모델 캐시 경로.
+//
+// 서버리스(Vercel)에서는 배포 번들이 읽기 전용이라 /tmp 밖에는 쓸 수 없다.
+// 컨테이너가 살아 있는 동안은 /tmp 가 유지되므로 콜드스타트 때만 내려받는다.
+// 로컬에서는 vector-pipeline 이 이미 받아둔 캐시를 재사용해 재다운로드를 피한다.
 function resolveCacheDir(): string {
   if (process.env.MODEL_CACHE_DIR) return path.resolve(process.env.MODEL_CACHE_DIR);
+
+  // Vercel·AWS Lambda 등 서버리스 환경
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    return '/tmp/model-cache';
+  }
 
   const repoRoot = path.resolve(process.cwd(), '..');
   const pipelineCache = path.join(
