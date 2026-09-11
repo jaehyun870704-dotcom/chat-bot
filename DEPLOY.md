@@ -27,7 +27,7 @@ Vercel 프로젝트 → Settings → Environment Variables 에 등록한다.
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://rvbzpimzgpdkcsopfuca.supabase.co` | 클라이언트 |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase publishable key | 클라이언트 |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role secret | **서버 전용** |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase secret key (`sb_secret_…`) | **서버 전용** |
 | `NEXT_PUBLIC_SITE_URL` | 운영 도메인 (예: `https://chat-bot.vercel.app`) | 클라이언트 |
 | `ANTHROPIC_API_KEY` | (나중에) Claude API 키 | **서버 전용** |
 | `BILLING_ENABLED` | (나중에) 과금을 켤 때 `true` | 서버 |
@@ -40,6 +40,24 @@ Vercel 프로젝트 → Settings → Environment Variables 에 등록한다.
 
 환경변수가 없어도 빌드는 통과한다(값은 실제로 쓰일 때 검증한다). 대신 값이 빠진 채 배포하면
 해당 기능이 요청 시점에 실패하므로, 첫 배포 전에 위 4개는 채워 두는 것이 좋다.
+
+## 비밀키 취급
+
+`.env` / `.env.local` 은 `.gitignore` 로 막혀 있고, 그 위에 커밋 훅을 하나 더 뒀다.
+
+```
+git config core.hooksPath .githooks   # 클론한 뒤 한 번만 실행
+bash scripts/check-secrets.sh          # 수동 점검
+```
+
+훅은 두 가지를 막는다. `.env` 계열 파일이 커밋 대상에 들어오는 것과, 파일 내용에
+`sb_secret_…` / `sk-ant-…` / JWT 형태 문자열이 들어 있는 것이다. `.gitignore` 만으로는
+`git add -f` 나 코드에 하드코딩한 값을 막지 못한다.
+
+**키가 한 번이라도 외부에 노출됐다면 폐기하고 새로 발급하는 것이 원칙이다.**
+Supabase → Settings → API Keys 에서 secret key 를 revoke 하고 새로 만든 뒤,
+로컬 `.env.local` 과 Vercel 환경변수를 함께 교체한다. 서버 전용 키라 클라이언트 배포는
+영향받지 않는다.
 
 ## Supabase Auth 설정
 
