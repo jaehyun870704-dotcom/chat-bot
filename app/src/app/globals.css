@@ -13,8 +13,16 @@
   }
 
   body {
-    @apply bg-background text-on-surface antialiased;
+    @apply bg-background text-body-md text-on-surface antialiased;
     font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  }
+
+  /* 목업과 동일하게 스크롤바를 숨긴다. 스크롤 자체는 그대로 동작한다. */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  * {
+    scrollbar-width: none;
   }
 
   /* 아이콘 폰트. 텍스트가 아니라 글리프이므로 줄바꿈·선택에서 제외한다. */

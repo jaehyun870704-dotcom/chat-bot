@@ -18,7 +18,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
   }
 
-  let payload: { conversationId?: unknown; question?: unknown };
+  let payload: {
+    conversationId?: unknown;
+    question?: unknown;
+    replaceMessageId?: unknown;
+  };
   try {
     payload = await request.json();
   } catch {
@@ -27,6 +31,8 @@ export async function POST(request: NextRequest) {
 
   const conversationId = typeof payload.conversationId === 'string' ? payload.conversationId : '';
   const question = typeof payload.question === 'string' ? payload.question.trim() : '';
+  const replaceMessageId =
+    typeof payload.replaceMessageId === 'string' ? payload.replaceMessageId : null;
 
   if (!conversationId || !question) {
     return NextResponse.json({ error: '질문을 입력해 주세요.' }, { status: 400 });
@@ -50,6 +56,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '대화를 찾을 수 없습니다.' }, { status: 404 });
   }
 
+  // 다시 생성: 기존 답변을 지우고 같은 질문을 재실행한다.
+  // 삭제도 사용자 세션으로 수행하므로 RLS 가 소유권을 강제한다 —
+  // 남의 메시지 id 를 보내도 지워지지 않는다.
+  if (replaceMessageId) {
+    const { data: removed } = await supabase
+      .from('messages')
+      .delete()
+      .eq('id', replaceMessageId)
+      .eq('conversation_id', conversationId)
+      .eq('role', 'assistant')
+      .select('id');
+
+    if (!removed || removed.length === 0) {
+      return NextResponse.json({ error: '다시 생성할 답변을 찾을 수 없습니다.' }, { status: 404 });
+    }
+  }
+
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
@@ -59,6 +82,7 @@ export async function POST(request: NextRequest) {
           userId: user.id,
           conversationId,
           question,
+          skipUserMessage: Boolean(replaceMessageId),
         })) {
           controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
         }

@@ -1,35 +1,51 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Icon } from './Icon';
 import { BrandMark } from './BrandMark';
 import { ConversationList, type Conversation } from './ConversationList';
 
-// 데스크톱은 고정 사이드바, 모바일은 상단 앱바 + 서랍(drawer).
-// 목업이 모바일 기준이라 좁은 화면에서 그 형태가 그대로 나오게 했다.
+// 데스크톱은 고정 사이드바, 모바일은 목업의 상단 앱바 + 서랍(drawer).
 
 export function ChatShell({
   conversations,
   email,
   usageLabel,
+  modeLabel,
   createConversation,
+  signOut,
   children,
 }: {
   conversations: Conversation[];
   email: string;
   usageLabel: string;
+  modeLabel: string;
   createConversation: () => Promise<void>;
+  signOut: () => Promise<void>;
   children: React.ReactNode;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   // 대화를 고르면 서랍을 닫는다.
   useEffect(() => {
     setDrawerOpen(false);
+    setMenuOpen(false);
   }, [pathname]);
+
+  // 바깥을 누르면 메뉴를 닫는다.
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onPointerDown(e: PointerEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    }
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [menuOpen]);
 
   const sidebar = (
     <>
@@ -60,13 +76,24 @@ export function ChatShell({
       <div className="flex flex-col gap-1.5 border-t border-outline-variant/40 p-space-md">
         <p className="truncate text-label-sm text-on-surface">{email}</p>
         <p className="text-caption text-on-surface-variant">{usageLabel}</p>
-        <Link
-          href="/account"
-          className="mt-1 flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-caption text-on-surface-variant transition-colors hover:bg-surface-container"
-        >
-          <Icon name="account_circle" size={16} />
-          마이페이지
-        </Link>
+        <div className="mt-1 flex items-center gap-1">
+          <Link
+            href="/account"
+            className="flex flex-1 items-center gap-1.5 rounded-lg px-2 py-1.5 text-caption text-on-surface-variant transition-colors hover:bg-surface-container"
+          >
+            <Icon name="account_circle" size={16} />
+            마이페이지
+          </Link>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-caption text-on-surface-variant transition-colors hover:bg-surface-container"
+            >
+              <Icon name="logout" size={16} />
+              로그아웃
+            </button>
+          </form>
+        </div>
       </div>
     </>
   );
@@ -93,35 +120,88 @@ export function ChatShell({
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* 모바일 앱바 */}
-        <header className="pt-safe z-40 shrink-0 border-b border-outline-variant/40 bg-surface/85 backdrop-blur-xl md:hidden">
-          <div className="flex h-14 items-center justify-between gap-space-sm px-space-sm">
-            <button
-              aria-label="대화 목록"
-              onClick={() => setDrawerOpen(true)}
-              className="flex h-11 w-11 items-center justify-center rounded-full text-on-surface transition-colors hover:bg-surface-container"
-            >
-              <Icon name="menu" />
-            </button>
+        {/* 모바일 앱바 — 목업 구조 그대로 */}
+        <header className="pt-safe z-40 shrink-0 bg-surface/85 shadow-header backdrop-blur-xl md:hidden">
+          <div className="flex h-16 items-center justify-between gap-space-sm px-margin">
+            <div className="flex min-w-0 items-center gap-space-xs">
+              <button
+                aria-label="대화 목록"
+                onClick={() => setDrawerOpen(true)}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-on-surface transition-colors hover:bg-surface-container"
+              >
+                <Icon name="menu" />
+              </button>
 
-            <div className="flex min-w-0 items-center gap-1.5">
-              <BrandMark size={24} />
-              <span className="truncate text-label-md font-semibold text-on-surface">
-                좋은인재연구소
-              </span>
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-              </span>
+              <BrandMark size={32} />
+
+              <div className="flex min-w-0 flex-col">
+                <div className="flex items-center gap-space-xs">
+                  <span className="truncate text-headline-sm text-on-surface">좋은인재연구소</span>
+                  <span className="relative flex h-2 w-2 shrink-0">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                  </span>
+                </div>
+                <div className="flex items-center gap-space-xs">
+                  <p className="truncate text-caption text-on-surface-variant">노동법·HR 자료 검색</p>
+                  <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-surface-container-high px-1.5 py-0.5 text-caption font-medium text-on-primary-fixed">
+                    <Icon name="bolt" size={12} />
+                    {modeLabel}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <Link
-              href="/account"
-              aria-label="마이페이지"
-              className="flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container"
-            >
-              <Icon name="account_circle" />
-            </Link>
+            <div className="relative flex shrink-0 items-center gap-space-xs" ref={menuRef}>
+              <button
+                aria-label="더보기"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((v) => !v)}
+                className="flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container"
+              >
+                <Icon name="more_vert" />
+              </button>
+
+              {menuOpen && (
+                <div className="absolute right-0 top-12 z-50 flex w-44 flex-col overflow-hidden rounded-xl bg-surface-container-lowest py-1 shadow-md">
+                  <form action={createConversation}>
+                    <button
+                      type="submit"
+                      className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-label-md text-on-surface transition-colors hover:bg-surface-container"
+                    >
+                      <Icon name="add_comment" size={18} className="text-on-surface-variant" />새
+                      대화
+                    </button>
+                  </form>
+                  <Link
+                    href="/account"
+                    className="flex items-center gap-2 px-3 py-2.5 text-label-md text-on-surface transition-colors hover:bg-surface-container"
+                  >
+                    <Icon name="account_circle" size={18} className="text-on-surface-variant" />
+                    마이페이지
+                  </Link>
+                  <form action={signOut}>
+                    <button
+                      type="submit"
+                      className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-label-md text-on-surface transition-colors hover:bg-surface-container"
+                    >
+                      <Icon name="logout" size={18} className="text-on-surface-variant" />
+                      로그아웃
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              <Link
+                href="/account"
+                aria-label="마이페이지"
+                className="flex h-11 w-11 items-center justify-center rounded-full transition-opacity hover:opacity-90"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-high text-label-sm font-semibold text-on-primary-fixed">
+                  {email.slice(0, 1).toUpperCase() || '?'}
+                </span>
+              </Link>
+            </div>
           </div>
         </header>
 

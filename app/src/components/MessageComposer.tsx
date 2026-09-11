@@ -1,11 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon } from './Icon';
 import { BrandMark } from './BrandMark';
 import { RichText } from './RichText';
-import { DISCLAIMER_BOTTOM } from '@/lib/answer/disclaimer';
+import { SUGGESTIONS } from './SuggestedQuestions';
 
 // PRD F-03: 스트리밍 출력. 검색 중·생성 중 상태를 UI에 표시한다.
 
@@ -29,20 +29,83 @@ const BLOCKED_MESSAGE: Record<string, string> = {
   no_profile: '계정 정보를 불러오지 못했습니다. 다시 로그인해 주세요.',
 };
 
+// 음성 입력은 브라우저 내장 API 를 쓴다. 지원하지 않는 브라우저에서는 버튼을 숨긴다.
+type SpeechRecognitionLike = {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  start: () => void;
+  stop: () => void;
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+};
+
+function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
+  if (typeof window === 'undefined') return null;
+  const w = window as unknown as {
+    SpeechRecognition?: new () => SpeechRecognitionLike;
+    webkitSpeechRecognition?: new () => SpeechRecognitionLike;
+  };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
 export function MessageComposer({ conversationId }: { conversationId: string }) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
   const [pending, setPending] = useState(false);
   const [stage, setStage] = useState<Stage | null>(null);
   const [draft, setDraft] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [speechAvailable, setSpeechAvailable] = useState(false);
 
-  // 실패하면 사용자가 쓴 질문을 되돌려 준다. 다시 타이핑하게 만들지 않는다.
-  function restoreQuestion(question: string) {
-    if (inputRef.current) inputRef.current.value = question;
+  useEffect(() => {
+    setSpeechAvailable(getSpeechRecognition() !== null);
+    return () => recognitionRef.current?.stop();
+  }, []);
+
+  function setQuestion(text: string) {
+    const el = inputRef.current;
+    if (!el) return;
+    el.value = text;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+    el.focus();
+  }
+
+  function toggleDictation() {
+    const Recognition = getSpeechRecognition();
+    if (!Recognition) return;
+
+    if (listening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    const recognition = new Recognition();
+    recognition.lang = 'ko-KR';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+
+    recognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = 0; i < event.results.length; i += 1) {
+        transcript += event.results[i][0].transcript;
+      }
+      setQuestion(transcript);
+    };
+    recognition.onerror = () => setListening(false);
+    recognition.onend = () => setListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setListening(true);
   }
 
   async function handleSubmit(formData: FormData) {
@@ -54,7 +117,9 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
     setDraft('');
     setNotice(null);
     setError(null);
+    setSheetOpen(false);
     formRef.current?.reset();
+    if (inputRef.current) inputRef.current.style.height = 'auto';
 
     try {
       const response = await fetch('/api/ask', {
@@ -66,7 +131,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
       if (!response.ok || !response.body) {
         const body = await response.json().catch(() => null);
         setError(body?.error ?? '답변을 생성하지 못했습니다.');
-        restoreQuestion(question);
+        setQuestion(question);
         return;
       }
 
@@ -103,11 +168,11 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
               break;
             case 'blocked':
               setError(BLOCKED_MESSAGE[String(event.reason)] ?? '이용할 수 없습니다.');
-              restoreQuestion(question);
+              setQuestion(question);
               break;
             case 'error':
               setError(String(event.message));
-              restoreQuestion(question);
+              setQuestion(question);
               break;
             case 'done':
               // 저장된 메시지를 서버에서 다시 읽어 정본으로 교체한다.
@@ -118,7 +183,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
       }
     } catch {
       setError('연결이 끊겼습니다. 다시 시도해 주세요.');
-      restoreQuestion(question);
+      setQuestion(question);
     } finally {
       setPending(false);
       setStage(null);
@@ -129,14 +194,14 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
   const showOverlay = Boolean(stage || draft || notice || error);
 
   return (
-    <div className="pb-safe shrink-0 border-t border-outline-variant/40 bg-surface/85 backdrop-blur-xl shadow-dock">
+    <div className="pb-safe shrink-0 bg-surface/85 shadow-dock backdrop-blur-xl">
       {showOverlay && (
         <div className="mx-auto w-full max-w-3xl px-margin pt-space-md">
           {/* 진행 중 표시 — 목업의 타이핑 인디케이터 패턴 */}
           {stage && !draft && (
             <div className="flex items-start gap-space-sm">
               <BrandMark size={28} className="shadow-sm" />
-              <div className="flex flex-col gap-1 rounded-xl rounded-tl-DEFAULT bg-surface-container-lowest px-3.5 py-2.5 shadow-sm">
+              <div className="flex flex-col gap-1 rounded-2xl rounded-tl-sm bg-surface-container-lowest px-3.5 py-2.5 shadow-sm">
                 <div className="flex items-center gap-2">
                   <span className="flex items-center gap-1">
                     <span className="typing-dot h-1.5 w-1.5 rounded-full bg-primary" />
@@ -156,7 +221,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
           {draft && (
             <div className="flex items-start gap-space-sm">
               <BrandMark size={28} className="shadow-sm" />
-              <div className="no-scrollbar max-h-56 min-w-0 flex-1 overflow-y-auto rounded-xl rounded-tl-DEFAULT bg-surface-container-lowest p-3.5 shadow-sm">
+              <div className="no-scrollbar max-h-56 min-w-0 flex-1 overflow-y-auto rounded-2xl rounded-tl-sm bg-surface-container-lowest p-3.5 shadow-sm">
                 <RichText
                   text={draft}
                   className="text-body-sm leading-relaxed text-on-surface-variant"
@@ -186,12 +251,67 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
         </div>
       )}
 
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-1.5 px-margin py-space-md">
+      {/* 첨부 버튼(+) 자리 — 파일 대신 추천 질문을 연다. 우리 제품에는 첨부할 파일이 없다. */}
+      {sheetOpen && (
+        <div className="mx-auto w-full max-w-3xl px-margin pt-space-md">
+          <div className="flex flex-col gap-2 rounded-xl bg-surface-container-lowest p-space-md shadow-md">
+            <p className="px-1 text-label-sm font-semibold text-on-surface-variant">추천 질문</p>
+            <div className="flex flex-col gap-1">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s.label}
+                  type="button"
+                  onClick={() => {
+                    setQuestion(s.question);
+                    setSheetOpen(false);
+                  }}
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-surface-container"
+                >
+                  <span className="text-sm">{s.emoji}</span>
+                  <span className="break-keep-ko text-body-sm text-on-surface">{s.question}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-1.5 px-margin pb-space-sm pt-space-sm">
         <form
           ref={formRef}
           action={handleSubmit}
-          className="flex items-end gap-1.5 rounded-xl bg-surface-container-lowest p-1.5 shadow-md"
+          className="flex items-end gap-1.5 rounded-full bg-surface-container-lowest p-1.5 shadow-md"
         >
+          <button
+            type="button"
+            aria-label="추천 질문"
+            aria-expanded={sheetOpen}
+            onClick={() => setSheetOpen((v) => !v)}
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all active:scale-95 ${
+              sheetOpen
+                ? 'bg-primary-fixed text-on-primary-fixed'
+                : 'text-on-surface-variant hover:bg-surface-container'
+            }`}
+          >
+            <Icon name="add" size={20} />
+          </button>
+
+          {speechAvailable && (
+            <button
+              type="button"
+              aria-label={listening ? '음성 입력 중지' : '음성 입력'}
+              aria-pressed={listening}
+              onClick={toggleDictation}
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all active:scale-95 ${
+                listening
+                  ? 'bg-error-container text-on-error-container'
+                  : 'text-on-surface-variant hover:bg-surface-container'
+              }`}
+            >
+              <Icon name={listening ? 'stop_circle' : 'mic'} size={20} />
+            </button>
+          )}
+
           <textarea
             ref={inputRef}
             name="question"
@@ -200,11 +320,11 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
             maxLength={2000}
             disabled={pending}
             placeholder="노동법·인사 실무 질문을 입력하세요"
-            className="no-scrollbar max-h-32 min-w-0 flex-1 resize-none bg-transparent px-3 py-2.5 text-body-md text-on-surface outline-none placeholder:text-outline/70 disabled:opacity-60"
+            className="no-scrollbar max-h-[120px] min-w-0 flex-1 resize-none self-center bg-transparent px-1 py-1.5 text-body-md text-on-surface outline-none placeholder:text-outline/70 disabled:opacity-60"
             onInput={(e) => {
               const el = e.currentTarget;
               el.style.height = 'auto';
-              el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
+              el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -213,18 +333,20 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
               }
             }}
           />
+
           <button
             type="submit"
             disabled={pending}
             aria-label="질문 보내기"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary shadow-sm transition-all hover:opacity-95 active:scale-90 disabled:opacity-50"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary shadow-sm transition-all hover:opacity-95 active:scale-90 disabled:opacity-50"
           >
             <Icon name={pending ? 'more_horiz' : 'arrow_upward'} size={20} />
           </button>
         </form>
 
+        {/* 목업의 fine print 자리. 문구는 §7.3 하단 면책으로 고정되어 있다. */}
         <p className="px-2 text-center text-caption leading-tight text-outline">
-          {DISCLAIMER_BOTTOM}
+          자료를 검색해 정리한 정보 제공용 안내이며, 법률 자문이나 노무 상담이 아닙니다.
         </p>
       </div>
     </div>

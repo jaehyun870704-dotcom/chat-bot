@@ -38,28 +38,38 @@ export default async function ConversationPage({
         <h1 className="min-w-0 flex-1 truncate text-headline-sm text-on-surface">
           {conversation.title}
         </h1>
-        <span className="flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-1 text-caption font-medium text-on-primary-fixed">
+        <span className="flex shrink-0 items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-1 text-caption font-medium text-on-primary-fixed">
           <Icon name="database" size={13} />
           판례·행정해석 29.8만건
         </span>
       </header>
 
       <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-space-xl px-margin py-space-xl">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-space-lg px-margin pb-space-lg pt-space-md">
           {list.length === 0 ? (
             <EmptyThread />
           ) : (
             <>
               <DateDivider />
-              {list.map((m) =>
+              {list.map((m, i) =>
                 m.role === 'user' ? (
-                  <UserBubble key={m.id} content={m.content} createdAt={m.created_at} />
+                  <UserBubble
+                    key={m.id}
+                    content={m.content}
+                    createdAt={m.created_at}
+                    // 답변이 뒤따르면 처리가 끝난 것이다.
+                    answered={list[i + 1]?.role === 'assistant'}
+                  />
                 ) : (
                   <AnswerView
                     key={m.id}
                     body={m.content}
                     citations={m.citations}
                     createdAt={m.created_at}
+                    messageId={m.id}
+                    conversationId={id}
+                    // 다시 생성할 때 쓸 원래 질문. 바로 앞 사용자 메시지다.
+                    question={list[i - 1]?.role === 'user' ? list[i - 1].content : undefined}
                   />
                 )
               )}
@@ -75,7 +85,7 @@ export default async function ConversationPage({
 
 function DateDivider() {
   return (
-    <div className="flex items-center justify-center">
+    <div className="my-space-xs flex items-center justify-center">
       <div className="flex items-center gap-1.5 rounded-full bg-surface-container-high/70 px-3 py-1 shadow-sm backdrop-blur-md">
         <Icon name="calendar_today" size={14} className="text-on-surface-variant" />
         <span className="text-caption text-on-surface-variant">오늘</span>
@@ -84,15 +94,31 @@ function DateDivider() {
   );
 }
 
-function UserBubble({ content, createdAt }: { content: string; createdAt: string }) {
+function UserBubble({
+  content,
+  createdAt,
+  answered,
+}: {
+  content: string;
+  createdAt: string;
+  answered: boolean;
+}) {
   return (
     <div className="flex max-w-[82%] flex-col items-end gap-1 self-end">
-      <div className="rounded-xl rounded-br-DEFAULT bg-primary px-4 py-3 text-on-primary shadow-sm">
+      <div className="rounded-2xl rounded-br-sm bg-primary px-4 py-3 text-on-primary shadow-sm">
         <p className="break-keep-ko whitespace-pre-wrap text-body-md leading-relaxed">{content}</p>
       </div>
-      <span className="mr-1 text-caption text-on-surface-variant">
-        {new Date(createdAt).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' })}
-      </span>
+      <div className="mr-1 flex items-center gap-1">
+        <span className="text-caption text-on-surface-variant">
+          {new Date(createdAt).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' })}
+        </span>
+        {answered && (
+          <>
+            <span className="text-caption text-on-surface-variant">•</span>
+            <span className="text-caption font-medium text-primary">답변됨</span>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -100,11 +126,13 @@ function UserBubble({ content, createdAt }: { content: string; createdAt: string
 function EmptyThread() {
   return (
     <div className="flex flex-col gap-space-lg">
-      <div className="flex items-start gap-space-sm">
+      <DateDivider />
+
+      <div className="group flex max-w-[88%] items-start gap-space-sm">
         <BrandMark size={32} className="mt-6 shadow-sm" />
         <div className="flex min-w-0 flex-col gap-1">
           <span className="ml-1 text-label-sm font-semibold text-on-surface">노무 어시스턴트</span>
-          <div className="rounded-xl rounded-tl-DEFAULT bg-surface-container-lowest p-space-md shadow-sm">
+          <div className="rounded-2xl rounded-tl-sm bg-surface-container-lowest p-space-md shadow-sm">
             <p className="break-keep-ko text-body-md leading-relaxed text-on-surface">
               노동법·인사 실무 질문을 남겨 주세요. 판례·행정해석·지침·산재재결례·상담사례{' '}
               <strong className="font-semibold">29만 8천여 건</strong>을 검색해 근거와 함께

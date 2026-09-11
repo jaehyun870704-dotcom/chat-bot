@@ -68,10 +68,13 @@ export async function* runPipeline({
   userId,
   conversationId,
   question,
+  // 다시 생성: 같은 질문을 재실행한다. 사용자 메시지는 이미 대화에 있으므로 또 넣지 않는다.
+  skipUserMessage = false,
 }: {
   userId: string;
   conversationId: string;
   question: string;
+  skipUserMessage?: boolean;
 }): AsyncGenerator<PipelineEvent> {
   const admin = createAdminClient();
   const llmMode = isConfigured();
@@ -219,7 +222,9 @@ export async function* runPipeline({
     citations: Citation[] | null;
     usage: Usage;
   }): Promise<string | null> {
-    await admin.from('messages').insert({ conversation_id: id, role: 'user', content: q });
+    if (!skipUserMessage) {
+      await admin.from('messages').insert({ conversation_id: id, role: 'user', content: q });
+    }
 
     // 거절된 질문에는 assistant 행을 남기지 않는다. 고정 문구는 저장할 내용이 아니다.
     if (body === null) return null;

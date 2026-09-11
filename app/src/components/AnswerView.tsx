@@ -11,22 +11,20 @@ import { AnswerActions } from './AnswerActions';
 // 따라서 면책 문구는 저장이 아니라 이 렌더링 지점에서 코드가 조립한다(§7.2).
 // assemble() 을 거치지 않고 답변을 그리는 경로를 만들지 않는다.
 
-const CATEGORY_TONE: Record<string, string> = {
-  판례: 'bg-primary-fixed text-on-primary-fixed',
-  행정해석: 'bg-secondary-fixed text-on-secondary-fixed',
-  행정심판: 'bg-tertiary-fixed text-on-tertiary-fixed',
-  '산재심사 재결례': 'bg-surface-container-high text-on-surface-variant',
-  지침: 'bg-surface-container-high text-on-surface-variant',
-};
-
 export function AnswerView({
   body,
   citations,
   createdAt,
+  messageId,
+  conversationId,
+  question,
 }: {
   body: string;
   citations?: unknown;
   createdAt?: string;
+  messageId?: string;
+  conversationId?: string;
+  question?: string;
 }) {
   const assembled = assemble(body);
   const check = verifyAssembled(assembled);
@@ -60,11 +58,11 @@ export function AnswerView({
           )}
         </div>
 
-        <article className="flex flex-col gap-3 rounded-xl rounded-tl-DEFAULT bg-surface-container-lowest p-4 shadow-md">
-          {/* 상단 면책 — 코드가 삽입한다. LLM 이 만들지 않는다(§7.2). */}
-          <div className="flex items-start gap-1.5 rounded-lg bg-surface-container-low px-3 py-2">
-            <Icon name="info" size={16} className="mt-px shrink-0 text-primary" />
-            <p className="break-keep-ko text-caption leading-relaxed text-on-surface-variant">
+        <article className="flex flex-col gap-3 rounded-2xl rounded-tl-sm bg-surface-container-lowest p-4 shadow-md">
+          {/* 카드 헤더 + 상단 면책. 면책은 코드가 삽입한다. LLM 이 만들지 않는다(§7.2). */}
+          <div className="flex items-start gap-1.5">
+            <Icon name="auto_awesome" size={18} className="mt-0.5 shrink-0 text-primary" />
+            <p className="break-keep-ko text-body-sm leading-relaxed text-on-surface-variant">
               아래 답변은 제공된 판례·행정해석·상담사례 자료를 검색해 정리한{' '}
               <strong className="font-semibold text-on-surface">정보 제공용 안내</strong>이며, 법률
               자문이나 노무 상담이 아닙니다.
@@ -86,15 +84,20 @@ export function AnswerView({
             </section>
           ))}
 
-          {list.length > 0 && <CitationList citations={list} tone={CATEGORY_TONE} />}
+          {list.length > 0 && <CitationList citations={list} />}
 
           {/* 하단 면책 — 코드가 삽입한다. goodhr.kr 은 고정 텍스트다(§7.3). */}
-          <p className="break-keep-ko rounded-lg bg-surface-container-low px-3 py-2 text-caption leading-relaxed text-on-surface-variant">
+          <p className="break-keep-ko mt-1 text-body-sm leading-relaxed text-on-surface-variant">
             {DISCLAIMER_BOTTOM}
           </p>
         </article>
 
-        <AnswerActions text={plainText} />
+        <AnswerActions
+          text={plainText}
+          messageId={messageId}
+          conversationId={conversationId}
+          question={question}
+        />
       </div>
     </div>
   );

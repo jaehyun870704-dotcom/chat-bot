@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { createConversation } from './actions';
+import { signOut } from '@/app/(auth)/actions';
 import { isBillingEnabled } from '@/lib/billing/gate';
+import { isConfigured } from '@/lib/llm/client';
 import { ChatShell } from '@/components/ChatShell';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
@@ -28,7 +30,10 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
       usageLabel={
         isBillingEnabled() ? `무료 질문 ${used} / 3회 사용` : `질문 ${used}회 · 무료 이용 기간`
       }
+      // 목업의 모델 배지 자리. 지금 어떤 모드로 답하는지 그대로 보여 준다.
+      modeLabel={isConfigured() ? 'Sonnet 5' : '검색 전용'}
       createConversation={createConversation}
+      signOut={signOut}
     >
       {children}
     </ChatShell>
