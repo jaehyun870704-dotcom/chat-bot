@@ -34,11 +34,11 @@ export default async function ConversationPage({
 
   return (
     <>
-      <header className="hidden shrink-0 items-center gap-space-sm border-b border-outline-variant/40 px-space-xl py-space-md md:flex">
+      <header className="hidden shrink-0 items-center gap-space-sm border-b border-outline-variant px-space-xl py-space-md md:flex">
         <h1 className="min-w-0 flex-1 truncate text-headline-sm text-on-surface">
           {conversation.title}
         </h1>
-        <span className="flex shrink-0 items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-1 text-caption font-medium text-on-primary-fixed">
+        <span className="flex shrink-0 items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-caption font-semibold text-on-accent">
           <Icon name="database" size={13} />
           보유 자료 29.8만건
         </span>
@@ -85,11 +85,11 @@ export default async function ConversationPage({
 
 function DateDivider() {
   return (
-    <div className="my-space-xs flex items-center justify-center">
-      <div className="flex items-center gap-1.5 rounded-full bg-surface-container-high/70 px-3 py-1 shadow-sm backdrop-blur-md">
-        <Icon name="calendar_today" size={14} className="text-on-surface-variant" />
-        <span className="text-caption text-on-surface-variant">오늘</span>
+    <div className="relative my-space-sm flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center">
+        <div className="w-full border-t border-outline-variant" />
       </div>
+      <span className="relative bg-surface px-3 text-caption text-outline">오늘</span>
     </div>
   );
 }
@@ -105,7 +105,7 @@ function UserBubble({
 }) {
   return (
     <div className="flex max-w-[82%] flex-col items-end gap-1 self-end">
-      <div className="rounded-2xl rounded-br-sm bg-primary px-4 py-3 text-on-primary shadow-sm">
+      <div className="rounded-2xl rounded-br-sm bg-accent px-4 py-3 text-on-accent shadow-sm">
         <p className="break-keep-ko whitespace-pre-wrap text-body-md leading-relaxed">{content}</p>
       </div>
       <div className="mr-1 flex items-center gap-1">
@@ -132,7 +132,7 @@ function EmptyThread() {
         <BrandAvatar size={32} className="mt-6 shadow-sm" />
         <div className="flex min-w-0 flex-col gap-1">
           <span className="ml-1 text-label-sm font-semibold text-on-surface">노무 어시스턴트</span>
-          <div className="rounded-2xl rounded-tl-sm bg-surface-container-lowest p-space-md shadow-sm">
+          <div className="rounded-2xl rounded-tl-sm bg-surface-container p-space-md">
             <p className="break-keep-ko text-body-md leading-relaxed text-on-surface">
               인사 실무에서 막히는 점을 물어보세요. 보유 자료{' '}
               <strong className="font-semibold">29만 8천여 건</strong>에서 찾아, 무엇을 근거로

@@ -34,8 +34,8 @@ export default async function AccountPage() {
     : 0;
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background">
-      <header className="pt-safe sticky top-0 z-40 border-b border-outline-variant/40 bg-surface/85 backdrop-blur-xl">
+    <div className="flex min-h-[100dvh] flex-col bg-surface">
+      <header className="pt-safe sticky top-0 z-40 border-b border-outline-variant bg-surface">
         <div className="mx-auto flex h-14 w-full max-w-2xl items-center gap-space-sm px-space-sm">
           <Link
             href="/chat"
@@ -49,8 +49,8 @@ export default async function AccountPage() {
       </header>
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-space-xl px-margin py-space-xl">
-        <section className="flex items-center gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
-          <BrandMark size={40} className="text-primary" title="좋은인재연구소" />
+        <section className="flex items-center gap-space-md rounded-xl bg-surface-container-low p-space-lg">
+          <BrandMark size={40} className="text-on-surface" title="좋은인재연구소" />
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-label-md font-semibold text-on-surface">
               {profile?.email ?? user?.email ?? '—'}
@@ -62,11 +62,11 @@ export default async function AccountPage() {
         </section>
 
         {!billing && (
-          <section className="flex items-start gap-1.5 rounded-xl bg-primary-fixed p-space-lg">
-            <Icon name="celebration" size={18} className="mt-px shrink-0 text-on-primary-fixed" />
+          <section className="flex items-start gap-1.5 rounded-xl bg-accent p-space-lg">
+            <Icon name="celebration" size={18} className="mt-px shrink-0 text-on-accent" />
             <div className="flex flex-col gap-0.5">
-              <p className="text-label-md font-semibold text-on-primary-fixed">무료 이용 기간</p>
-              <p className="break-keep-ko text-body-sm leading-relaxed text-on-primary-fixed-variant">
+              <p className="text-label-md font-semibold text-on-accent">무료 이용 기간</p>
+              <p className="break-keep-ko text-body-sm leading-relaxed text-on-accent/80">
                 질문 횟수에 제한이 없습니다. 결제는 준비되는 대로 안내드립니다.
               </p>
             </div>
@@ -75,7 +75,7 @@ export default async function AccountPage() {
 
         <section className="flex flex-col gap-2">
           <h2 className="px-1 text-label-sm font-semibold text-on-surface-variant">구독</h2>
-          <dl className="overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm">
+          <dl className="overflow-hidden rounded-xl border border-outline-variant bg-surface">
             <Row
               label="상태"
               value={

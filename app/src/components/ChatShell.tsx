@@ -102,9 +102,9 @@ export function ChatShell({
   );
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden bg-background">
+    <div className="flex h-[100dvh] overflow-hidden bg-background md:p-space-lg">
       {/* 데스크톱 사이드바 */}
-      <aside className="hidden w-72 shrink-0 flex-col border-r border-outline-variant/40 bg-surface-container-low md:flex">
+      <aside className="hidden w-72 shrink-0 flex-col rounded-l-xl border-r border-outline-variant bg-surface-container-low md:flex">
         {sidebar}
       </aside>
 
@@ -122,9 +122,9 @@ export function ChatShell({
         </div>
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col bg-surface md:rounded-r-xl md:shadow-frame">
         {/* 모바일 앱바 — 목업 구조 그대로 */}
-        <header className="pt-safe z-40 shrink-0 bg-surface/85 shadow-header backdrop-blur-xl md:hidden">
+        <header className="pt-safe z-40 shrink-0 border-b border-outline-variant bg-surface md:hidden">
           <div className="flex h-16 items-center justify-between gap-space-sm px-margin">
             <div className="flex min-w-0 items-center gap-space-xs">
               <button

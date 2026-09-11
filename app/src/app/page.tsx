@@ -35,8 +35,9 @@ export default async function LandingPage() {
   const user = await tryGetUser();
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background">
-      <header className="pt-safe sticky top-0 z-40 bg-surface/85 shadow-header backdrop-blur-xl">
+    <div className="flex min-h-[100dvh] flex-col bg-background px-0 py-0 sm:px-space-lg sm:py-space-lg">
+      <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden bg-surface shadow-frame sm:rounded-xl">
+      <header className="pt-safe sticky top-0 z-40 border-b border-outline-variant bg-surface">
         <div className="mx-auto flex h-16 w-full max-w-3xl items-center justify-between px-margin">
           <BrandLockup size={30} />
           <Link
@@ -51,7 +52,7 @@ export default async function LandingPage() {
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-space-xl px-margin py-space-xl">
         {/* 히어로 */}
         <section className="flex flex-col gap-space-lg pt-space-lg">
-          <span className="flex w-fit items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-caption font-medium text-on-primary-fixed">
+          <span className="flex w-fit items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-caption font-semibold text-on-accent">
             <Icon name="database" size={13} />
             실제 자료 29만 8천 건
           </span>
@@ -59,7 +60,7 @@ export default async function LandingPage() {
           <h1 className="break-keep-ko text-display-sm text-on-surface">
             물어볼 사람이 없을 때,
             <br />
-            <span className="text-primary">근거까지 찾아</span> 드립니다.
+            <span className="bg-accent px-1.5 py-0.5">근거까지 찾아</span> 드립니다.
           </h1>
 
           <p className="break-keep-ko text-body-lg leading-relaxed text-on-surface-variant">
@@ -105,9 +106,9 @@ export default async function LandingPage() {
             {CORPUS.map((c) => (
               <div
                 key={c.label}
-                className="flex flex-col items-start gap-1 rounded-xl bg-surface-container-lowest p-space-md shadow-sm"
+                className="flex flex-col items-start gap-1 rounded-xl bg-surface-container-low p-space-md"
               >
-                <Icon name={c.icon} size={18} className="text-primary" />
+                <Icon name={c.icon} size={18} className="text-on-surface-variant" />
                 <span className="text-headline-sm tabular-nums text-on-surface">{c.value}</span>
                 <span className="text-caption text-on-surface-variant">{c.label}</span>
               </div>
@@ -128,9 +129,9 @@ export default async function LandingPage() {
             {COMPARISON.map((c) => (
               <div
                 key={c.ours}
-                className="flex items-start gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm"
+                className="flex items-start gap-space-md rounded-xl bg-surface-container-low p-space-lg"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-on-primary-fixed">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent">
                   <Icon name={c.icon} size={18} />
                 </span>
                 <div className="flex min-w-0 flex-col gap-1">
@@ -138,7 +139,7 @@ export default async function LandingPage() {
                     {c.common}
                   </p>
                   <p className="break-keep-ko flex items-start gap-1.5 text-body-md font-medium leading-relaxed text-on-surface">
-                    <Icon name="check" size={16} className="mt-1 shrink-0 text-primary" />
+                    <Icon name="check" size={16} className="mt-1 shrink-0 text-on-surface" />
                     {c.ours}
                   </p>
                 </div>
@@ -159,11 +160,12 @@ export default async function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-outline-variant/40 px-margin py-space-lg">
+      <footer className="border-t border-outline-variant px-margin py-space-lg">
         <p className="mx-auto max-w-3xl text-caption text-on-surface-variant">
           좋은인재연구소(GTI) · goodhr.kr
         </p>
       </footer>
+      </div>
     </div>
   );
 }

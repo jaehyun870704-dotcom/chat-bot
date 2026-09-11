@@ -194,14 +194,14 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
   const showOverlay = Boolean(stage || draft || notice || error);
 
   return (
-    <div className="pb-safe shrink-0 bg-surface/85 shadow-dock backdrop-blur-xl">
+    <div className="pb-safe shrink-0 border-t border-outline-variant bg-surface">
       {showOverlay && (
         <div className="mx-auto w-full max-w-3xl px-margin pt-space-md">
           {/* 진행 중 표시 — 목업의 타이핑 인디케이터 패턴 */}
           {stage && !draft && (
             <div className="flex items-start gap-space-sm">
               <BrandAvatar size={28} className="shadow-sm" />
-              <div className="flex flex-col gap-1 rounded-2xl rounded-tl-sm bg-surface-container-lowest px-3.5 py-2.5 shadow-sm">
+              <div className="flex flex-col gap-1 rounded-2xl rounded-tl-sm bg-surface-container px-3.5 py-2.5">
                 <div className="flex items-center gap-2">
                   <span className="flex items-center gap-1">
                     <span className="typing-dot h-1.5 w-1.5 rounded-full bg-primary" />
@@ -221,7 +221,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
           {draft && (
             <div className="flex items-start gap-space-sm">
               <BrandAvatar size={28} className="shadow-sm" />
-              <div className="no-scrollbar max-h-56 min-w-0 flex-1 overflow-y-auto rounded-2xl rounded-tl-sm bg-surface-container-lowest p-3.5 shadow-sm">
+              <div className="no-scrollbar max-h-56 min-w-0 flex-1 overflow-y-auto rounded-2xl rounded-tl-sm bg-surface-container p-3.5">
                 <RichText
                   text={draft}
                   className="text-body-sm leading-relaxed text-on-surface-variant"
@@ -280,7 +280,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
         <form
           ref={formRef}
           action={handleSubmit}
-          className="flex items-end gap-1.5 rounded-full bg-surface-container-lowest p-1.5 shadow-md"
+          className="flex items-end gap-1.5 rounded-full bg-surface-container p-1.5"
         >
           <button
             type="button"
@@ -320,7 +320,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
             maxLength={2000}
             disabled={pending}
             placeholder="인사 실무에서 막히는 점을 물어보세요"
-            className="no-scrollbar max-h-[120px] min-w-0 flex-1 resize-none self-center bg-transparent px-1 py-1.5 text-body-md text-on-surface outline-none placeholder:text-outline/70 disabled:opacity-60"
+            className="no-scrollbar max-h-[120px] min-w-0 flex-1 resize-none self-center bg-transparent px-2 py-1.5 text-body-md text-on-surface outline-none placeholder:text-outline disabled:opacity-60"
             onInput={(e) => {
               const el = e.currentTarget;
               el.style.height = 'auto';

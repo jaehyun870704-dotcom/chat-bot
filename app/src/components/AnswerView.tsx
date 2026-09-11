@@ -58,7 +58,7 @@ export function AnswerView({
           )}
         </div>
 
-        <article className="flex flex-col gap-3 rounded-2xl rounded-tl-sm bg-surface-container-lowest p-4 shadow-md">
+        <article className="flex flex-col gap-3 rounded-2xl rounded-tl-sm bg-surface-container p-4">
           {/* 카드 헤더 + 상단 면책. 면책은 코드가 삽입한다. LLM 이 만들지 않는다(§7.2). */}
           <div className="flex items-start gap-1.5">
             <Icon name="auto_awesome" size={18} className="mt-0.5 shrink-0 text-primary" />

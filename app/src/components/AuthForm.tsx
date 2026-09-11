@@ -43,7 +43,7 @@ export function AuthForm({
         </Link>
 
         <div className="flex flex-col items-center gap-space-md text-center">
-          <BrandMark size={52} className="text-primary" title="좋은인재연구소" />
+          <BrandMark size={56} className="text-on-accent" title="좋은인재연구소" />
           <div className="flex flex-col gap-1">
             <h1 className="text-headline-md text-on-surface">{title}</h1>
             <p className="break-keep-ko text-body-sm text-on-surface-variant">{subtitle}</p>
@@ -52,7 +52,7 @@ export function AuthForm({
 
         <form
           action={formAction}
-          className="flex flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-md"
+          className="flex flex-col gap-space-md rounded-xl bg-surface p-space-xl shadow-frame"
         >
           <label className="flex flex-col gap-1.5">
             <span className="text-label-sm font-medium text-on-surface">이메일</span>
@@ -62,7 +62,7 @@ export function AuthForm({
               required
               autoComplete="email"
               placeholder="name@company.com"
-              className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2.5 text-body-md text-on-surface outline-none transition-colors placeholder:text-outline/60 focus:border-primary"
+              className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2.5 text-body-md text-on-surface outline-none transition-colors placeholder:text-outline focus:border-on-surface focus:bg-surface"
             />
           </label>
 
@@ -75,7 +75,7 @@ export function AuthForm({
                 required
                 minLength={8}
                 autoComplete={autoComplete}
-                className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2.5 text-body-md text-on-surface outline-none transition-colors focus:border-primary"
+                className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-3 py-2.5 text-body-md text-on-surface outline-none transition-colors focus:border-on-surface focus:bg-surface"
               />
               {passwordHint && (
                 <span className="text-caption text-on-surface-variant">{passwordHint}</span>

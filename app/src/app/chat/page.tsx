@@ -13,7 +13,7 @@ export default function ChatIndexPage() {
   return (
     <div className="no-scrollbar flex flex-1 flex-col items-center justify-center overflow-y-auto px-margin py-space-xl">
       <div className="flex w-full max-w-md flex-col items-center gap-space-xl text-center">
-        <BrandMark size={60} className="text-primary" title="좋은인재연구소" />
+        <span className="flex h-24 w-24 items-center justify-center rounded-full bg-accent"><BrandMark size={58} className="text-on-accent" title="좋은인재연구소" /></span>
 
         <div className="flex flex-col gap-2">
           <h1 className="text-headline-md text-on-surface">무엇을 도와드릴까요?</h1>
@@ -29,7 +29,7 @@ export default function ChatIndexPage() {
               key={h.label}
               className="flex flex-col items-start gap-1 rounded-xl bg-surface-container-low p-space-md text-left"
             >
-              <Icon name={h.icon} size={18} className="text-primary" />
+              <Icon name={h.icon} size={18} className="text-on-surface-variant" />
               <span className="text-headline-sm tabular-nums text-on-surface">{h.value}</span>
               <span className="text-caption text-on-surface-variant">{h.label}</span>
             </div>
