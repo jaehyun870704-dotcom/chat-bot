@@ -8,15 +8,19 @@
     "start": "next start",
     "lint": "next lint",
     "test": "node --import tsx --test test/**/*.test.ts",
-    "verify:rls": "node scripts/verify-rls.mjs"
+    "verify:rls": "node scripts/verify-rls.mjs",
+    "verify:pipeline": "tsx --conditions react-server scripts/verify-pipeline.mts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.125.0",
+    "@huggingface/transformers": "^4.2.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "zod": "^4.6.2"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
