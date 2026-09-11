@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import { SITE_URL } from '@/lib/env';
+import { siteUrl } from '@/lib/env';
 
 export type AuthState = { error: string | null; notice: string | null };
 
@@ -38,7 +38,7 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   const { error } = await supabase.auth.signUp({
     email: creds.email,
     password: creds.password,
-    options: { emailRedirectTo: `${SITE_URL}/auth/callback` },
+    options: { emailRedirectTo: `${siteUrl()}/auth/callback` },
   });
 
   if (error) return { error: friendlyError(error.message), notice: null };
@@ -71,7 +71,7 @@ export async function requestPasswordReset(
 
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${SITE_URL}/auth/callback?next=/account`,
+    redirectTo: `${siteUrl()}/auth/callback?next=/account`,
   });
 
   // 계정 존재 여부가 드러나지 않도록 결과와 무관하게 같은 안내를 보낸다.

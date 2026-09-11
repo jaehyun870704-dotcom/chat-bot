@@ -2,7 +2,7 @@ import 'server-only';
 
 import { cookies } from 'next/headers';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/lib/env';
+import { supabaseAnonKey, supabaseUrl } from '@/lib/env';
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
@@ -10,7 +10,7 @@ type CookieToSet = { name: string; value: string; options?: CookieOptions };
 export async function createClient() {
   const cookieStore = await cookies();
 
-  return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  return createServerClient(supabaseUrl(), supabaseAnonKey(), {
     cookies: {
       getAll() {
         return cookieStore.getAll();

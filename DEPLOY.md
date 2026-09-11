@@ -12,8 +12,12 @@ supabase/        마이그레이션 SQL
 docs/            실측 보고서
 ```
 
-**Vercel 프로젝트 설정에서 Root Directory 를 `app` 으로 지정하는 것이 가장 깔끔하다.**
-그렇게 하면 레포 루트의 `vercel.json` 은 필요 없다.
+**Vercel 프로젝트 설정 → General → Root Directory 를 `app` 으로 지정한다.**
+
+레포 루트에 `vercel.json` 을 두지 않는다. Root Directory 를 `app` 으로 잡으면 빌드가
+이미 `app/` 안에서 돌기 때문에, `vercel.json` 에 `cd app && ...` 같은 명령을 넣으면
+`cd: app: No such file or directory` 로 실패한다. 둘 중 하나만 써야 한다.
+Root Directory 만 지정하면 Next.js 가 자동 감지되어 별도 설정이 필요 없다.
 
 ## 환경변수
 
@@ -24,12 +28,18 @@ Vercel 프로젝트 → Settings → Environment Variables 에 등록한다.
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://rvbzpimzgpdkcsopfuca.supabase.co` | 클라이언트 |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase publishable key | 클라이언트 |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role secret | **서버 전용** |
-| `NEXT_PUBLIC_SITE_URL` | 배포 도메인 (예: `https://chat-bot.vercel.app`) | 클라이언트 |
+| `NEXT_PUBLIC_SITE_URL` | 운영 도메인 (예: `https://chat-bot.vercel.app`) | 클라이언트 |
 | `ANTHROPIC_API_KEY` | (나중에) Claude API 키 | **서버 전용** |
 | `BILLING_ENABLED` | (나중에) 과금을 켤 때 `true` | 서버 |
 
 `ANTHROPIC_API_KEY` 가 없으면 검색 전용 모드로 동작한다. 키를 넣으면 생성 모드로 바뀐다.
 `BILLING_ENABLED` 를 비워두면 무료 무제한이다.
+
+`NEXT_PUBLIC_SITE_URL` 을 비워두면 Vercel 이 주는 배포 URL 을 쓴다. 다만 프리뷰 배포마다
+주소가 달라지므로, 운영 도메인이 정해지면 반드시 명시한다 — 이메일 인증 링크가 이 주소로 돌아온다.
+
+환경변수가 없어도 빌드는 통과한다(값은 실제로 쓰일 때 검증한다). 대신 값이 빠진 채 배포하면
+해당 기능이 요청 시점에 실패하므로, 첫 배포 전에 위 4개는 채워 두는 것이 좋다.
 
 ## Supabase Auth 설정
 
