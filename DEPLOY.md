@@ -14,10 +14,27 @@ docs/            실측 보고서
 
 **Vercel 프로젝트 설정 → General → Root Directory 를 `app` 으로 지정한다.**
 
-레포 루트에 `vercel.json` 을 두지 않는다. Root Directory 를 `app` 으로 잡으면 빌드가
-이미 `app/` 안에서 돌기 때문에, `vercel.json` 에 `cd app && ...` 같은 명령을 넣으면
-`cd: app: No such file or directory` 로 실패한다. 둘 중 하나만 써야 한다.
-Root Directory 만 지정하면 Next.js 가 자동 감지되어 별도 설정이 필요 없다.
+**레포 루트에는 `vercel.json` 을 두지 않는다.** Root Directory 를 `app` 으로 잡으면 빌드가
+이미 `app/` 안에서 돌기 때문에, 루트 `vercel.json` 에 `cd app && ...` 같은 명령을 넣으면
+`cd: app: No such file or directory` 로 실패한다.
+
+대신 `app/vercel.json` 에 올바른 값을 명시해 두었다. Vercel 은 `vercel.json` 을 Root
+Directory 기준으로 읽고, 이 파일의 값이 대시보드 설정보다 우선한다. 대시보드에 예전
+override(`cd app && npm install`, `app/.next` 등)가 남아 있어도 이 파일이 덮어쓴다.
+
+파일에 적힌 경로는 모두 Root Directory(`app`) 기준이다:
+
+```json
+{ "framework": "nextjs", "installCommand": "npm install",
+  "buildCommand": "next build", "outputDirectory": ".next" }
+```
+
+### 증상별 원인
+
+`/_next/static/...` 같은 정적 경로까지 `FUNCTION_INVOCATION_FAILED` 로 500 이 나면,
+환경변수 문제가 아니라 **빌드 산출물이 Next.js 로 인식되지 않는 것**이다. 정적 파일은
+CDN 이 직접 주므로 정상이라면 함수를 타지 않는다. Output Directory 가 잘못 지정되면
+모든 요청이 함수 하나로 떨어지면서 이 증상이 나온다.
 
 ## 환경변수
 
