@@ -98,7 +98,27 @@ Supabase → Authentication → URL Configuration 에서:
 인덱스를 만든 뒤에는 `supabase/migrations/20260910223901_...sql` 의
 함수 단위 `statement_timeout = 120s` 도 제거해야 한다.
 
-### 2. 임베딩 모델을 콜드스타트마다 내려받는다
+### 2. 서버리스 함수 용량 한계 (배포 실패의 주 원인)
+
+Vercel 은 함수당 **250MB(압축 해제 기준)** 제한이 있다. 질의 임베딩을 서버에서 직접
+돌리기 때문에 ONNX 런타임이 함수에 들어가는데, 이것만으로 한계에 근접한다. 실측:
+
+| 패키지 | 용량 |
+|---|---|
+| `onnxruntime-node` / win32 | 124 MB |
+| `onnxruntime-node` / linux | 53 MB |
+| `onnxruntime-node` / darwin | 35 MB |
+| `onnxruntime-web` | 130 MB |
+| `@huggingface/transformers` | 31 MB |
+
+`next.config.mjs` 의 `outputFileTracingExcludes` 로 쓰지 않는 플랫폼 바이너리(win32,
+darwin = 159MB)를 배포 번들에서 제외했다. 로컬 실행에는 영향이 없다.
+
+그래도 넘친다면 임베딩을 Vercel 밖으로 빼야 한다. 이 앱은 검색 하나에 17.7초가 걸리고
+큰 네이티브 런타임을 요구하므로, 서버리스보다 컨테이너 호스트(Railway·Fly.io·Render 등)가
+구조적으로 더 맞는다.
+
+### 3. 임베딩 모델을 콜드스타트마다 내려받는다
 
 질의 임베딩은 `Xenova/multilingual-e5-small`(q8, 약 120MB)을 서버에서 직접 돌린다.
 서버리스에서는 `/tmp/model-cache` 에 받아 두고 컨테이너가 살아 있는 동안 재사용한다.
@@ -108,7 +128,7 @@ Supabase → Authentication → URL Configuration 에서:
 다른 벡터 공간에 놓여 검색 품질이 조용히 무너진다.
 `search-lab/scripts/verify-embedding-parity.mjs` 가 그 동일성을 검증한다.
 
-### 3. Edge 런타임 불가
+### 4. Edge 런타임 불가
 
 `@huggingface/transformers` 는 Node 런타임에서만 동작한다.
 `/api/ask` 는 `runtime = 'nodejs'` 로 고정되어 있다. Edge 로 바꾸면 안 된다.
