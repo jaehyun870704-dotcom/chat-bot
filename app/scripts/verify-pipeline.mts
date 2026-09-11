@@ -118,44 +118,86 @@ try {
 
   if (isConfigured()) {
     check(
-      '[F-05] 답변 성공 시 무료 카운트가 1 올라간다',
-      after.data!.free_questions_used === before.data!.free_questions_used + 1,
-      `${before.data!.free_questions_used} → ${after.data!.free_questions_used}`
-    );
-    check(
-      '[F-05] 사용 토큰이 기록된다',
-      Number(balance.data!.used_tokens) > 0,
-      `used_tokens=${balance.data!.used_tokens}`
+      '[생성] 답변 성공 시 사용량이 기록된다',
+      after.data!.free_questions_used === before.data!.free_questions_used + 1 &&
+        Number(balance.data!.used_tokens) > 0,
+      `free ${before.data!.free_questions_used} → ${after.data!.free_questions_used}, used_tokens=${balance.data!.used_tokens}`
     );
   } else {
+    // 검색 전용 모드 — Claude API 없이 Supabase 자료만으로 답한다.
     check(
-      '[§9.3] 키가 없어 생성이 실패하면 과금하지 않는다',
-      after.data!.free_questions_used === before.data!.free_questions_used &&
-        Number(balance.data!.used_tokens) === 0,
-      `free_questions_used ${before.data!.free_questions_used} → ${after.data!.free_questions_used}, used_tokens=${balance.data!.used_tokens}`
+      '[검색전용] 키가 없어도 답변이 생성된다',
+      events.includes('text') && events.includes('done') && !events.includes('error'),
+      `이벤트: ${events.join(' → ')}`
+    );
+
+    const { data: saved } = await admin
+      .from('messages')
+      .select('content, citations')
+      .eq('conversation_id', conv!.id)
+      .eq('role', 'assistant')
+      .maybeSingle();
+
+    const sections = ['## 핵심 답변', '## 근거 자료 상세', '## 실무적 적용', '## 연관 내용', '## 관련 판례'];
+    check(
+      '[§7.1] 저장된 본문이 5개 섹션을 모두 갖는다',
+      sections.every((h) => saved?.content?.includes(h)),
+      sections.filter((h) => !saved?.content?.includes(h)).join(', ') || '전부 존재'
     );
     check(
-      '[§9.3] 실패가 error 이벤트로 전달된다',
-      events.includes('error'),
-      `이벤트: ${events.join(' → ')}`
+      '[§5] 저장된 본문에 면책 문구가 들어가지 않는다',
+      !saved?.content?.includes('법률 자문이나 노무 상담이 아닙니다') &&
+        !saved?.content?.includes('goodhr.kr'),
+      '면책은 렌더링 시 코드가 붙인다'
+    );
+    check(
+      '[§7] 저장된 본문을 조립하면 면책 검증을 통과한다',
+      verifyAssembled(assemble(saved?.content ?? '')).ok
+    );
+    check(
+      '[인용] 근거 청크가 citations 에 기록된다',
+      Array.isArray(saved?.citations) && (saved!.citations as unknown[]).length > 0,
+      `${(saved?.citations as unknown[] | null)?.length ?? 0}건`
+    );
+    check(
+      '[기록] 과금은 꺼져 있어도 사용량은 계속 쌓인다',
+      after.data!.free_questions_used === before.data!.free_questions_used + 1,
+      `free_questions_used ${before.data!.free_questions_used} → ${after.data!.free_questions_used} (D-03/D-05 근거 데이터)`
     );
   }
 
-  // 무료 3회 소진 후 차단되는지
+  // 과금 스위치가 양방향으로 동작하는지 — 끄면 통과, 켜면 차단.
   await admin.from('profiles').update({ free_questions_used: 3 }).eq('id', userId);
-  const blockedEvents: string[] = [];
+
+  const offEvents: string[] = [];
   for await (const event of runPipeline({
     userId,
     conversationId: conv!.id,
     question: '퇴직금은 어떻게 계산하나요?',
   })) {
-    blockedEvents.push(event.type === 'blocked' ? `blocked:${event.reason}` : event.type);
+    offEvents.push(event.type === 'blocked' ? `blocked:${event.reason}` : event.type);
   }
   check(
-    '[F-05] 무료 3회 소진 후 4번째 질문이 차단된다',
-    blockedEvents.includes('blocked:need_subscription'),
-    `이벤트: ${blockedEvents.join(' → ')}`
+    '[과금 OFF] 3회를 넘겨도 차단되지 않는다',
+    !offEvents.some((e) => e.startsWith('blocked')),
+    `이벤트: ${offEvents.join(' → ')}`
   );
+
+  process.env.BILLING_ENABLED = 'true';
+  const onEvents: string[] = [];
+  for await (const event of runPipeline({
+    userId,
+    conversationId: conv!.id,
+    question: '퇴직금은 어떻게 계산하나요?',
+  })) {
+    onEvents.push(event.type === 'blocked' ? `blocked:${event.reason}` : event.type);
+  }
+  check(
+    '[과금 ON] 켜면 무료 3회 소진 후 차단된다',
+    onEvents.includes('blocked:need_subscription'),
+    `이벤트: ${onEvents.join(' → ')}`
+  );
+  delete process.env.BILLING_ENABLED;
 } catch (err) {
   check('예외 없이 완료', false, (err as Error).message);
 } finally {

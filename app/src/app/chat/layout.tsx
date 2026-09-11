@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createConversation } from './actions';
 import { signOut } from '@/app/(auth)/actions';
 import { ConversationList } from '@/components/ConversationList';
+import { isBillingEnabled } from '@/lib/billing/gate';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -42,7 +43,11 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
 
         <div className="space-y-2 border-t border-neutral-200 p-3 text-xs text-neutral-500">
           <p className="truncate">{user?.email}</p>
-          <p>무료 질문 {profile?.free_questions_used ?? 0} / 3회 사용</p>
+          <p>
+            {isBillingEnabled()
+              ? `무료 질문 ${profile?.free_questions_used ?? 0} / 3회 사용`
+              : `질문 ${profile?.free_questions_used ?? 0}회 · 현재 무료 이용 기간`}
+          </p>
           <div className="flex gap-2">
             <Link href="/account" className="hover:underline">
               마이페이지

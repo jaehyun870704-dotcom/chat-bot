@@ -14,6 +14,20 @@ import { createAdminClient } from '@/lib/supabase/admin';
 
 export const FREE_QUESTION_LIMIT = 3;
 
+/**
+ * 과금 기능 on/off.
+ *
+ * 지금은 꺼져 있다. Claude API 를 붙이기 전까지는 답변에 LLM 비용이 들지 않으므로
+ * 무료 3회 제한을 걸 이유가 없고, 걸어두면 4번째 질문부터 결제 경로도 없이 막힌다.
+ * PG 사업자(D-01)를 확정하고 Phase 4 를 붙일 때 BILLING_ENABLED=true 로 켠다.
+ *
+ * 끈 동안에도 profiles.free_questions_used 와 token_balances.used_tokens 는
+ * 계속 기록한다. 나중에 가격을 정할 때(D-03/D-05) 쓸 실사용 데이터다.
+ */
+export function isBillingEnabled(): boolean {
+  return process.env.BILLING_ENABLED?.trim().toLowerCase() === 'true';
+}
+
 export type GateDecision =
   | { allowed: true; mode: 'free'; freeUsed: number }
   | { allowed: true; mode: 'subscription'; remainingTokens: number }
@@ -29,6 +43,11 @@ export async function checkGate(userId: string): Promise<GateDecision> {
     .maybeSingle();
 
   if (!profile) return { allowed: false, reason: 'no_profile' };
+
+  // 과금이 꺼져 있으면 한도를 적용하지 않는다. 사용량 기록은 계속한다.
+  if (!isBillingEnabled()) {
+    return { allowed: true, mode: 'free', freeUsed: profile.free_questions_used };
+  }
 
   const { data: subscription } = await admin
     .from('subscriptions')

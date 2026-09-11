@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { signOut } from '@/app/(auth)/actions';
+import { isBillingEnabled } from '@/lib/billing/gate';
 
 // PRD F-07 마이페이지. 결제·해지는 Phase 4(D-01 확정 후)에 붙인다.
 // 지금은 RLS 로 읽히는 현재 상태만 보여준다.
@@ -39,14 +40,30 @@ export default async function AccountPage() {
         <h2 className="text-sm font-semibold text-neutral-500">계정</h2>
         <dl className="divide-y divide-neutral-200 rounded-md border border-neutral-200 text-sm">
           <Row label="이메일" value={profile?.email ?? user?.email ?? '—'} />
-          <Row label="무료 질문 사용" value={`${profile?.free_questions_used ?? 0} / 3회`} />
+          <Row
+            label="질문 사용"
+            value={
+              isBillingEnabled()
+                ? `${profile?.free_questions_used ?? 0} / 3회`
+                : `${profile?.free_questions_used ?? 0}회 (무료 이용 기간, 제한 없음)`
+            }
+          />
         </dl>
       </section>
 
       <section className="space-y-2">
         <h2 className="text-sm font-semibold text-neutral-500">구독</h2>
         <dl className="divide-y divide-neutral-200 rounded-md border border-neutral-200 text-sm">
-          <Row label="상태" value={subscription ? `${subscription.plan} (${subscription.status})` : '구독 없음'} />
+          <Row
+            label="상태"
+            value={
+              subscription
+                ? `${subscription.plan} (${subscription.status})`
+                : isBillingEnabled()
+                  ? '구독 없음'
+                  : '무료 이용 기간'
+            }
+          />
           <Row
             label="다음 결제일"
             value={
@@ -58,6 +75,7 @@ export default async function AccountPage() {
           <Row label="잔여 토큰" value={remaining > 0 ? remaining.toLocaleString('ko-KR') : '—'} />
         </dl>
         <p className="text-xs text-neutral-500">
+          현재는 무료 이용 기간이라 질문 횟수에 제한이 없습니다.
           결제·충전·해지는 결제 사업자(D-01) 확정 후 Phase 4 에서 연결됩니다.
         </p>
       </section>
